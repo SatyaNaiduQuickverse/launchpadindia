@@ -2,12 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Navbar from './components/layout/Navbar';
+import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EnhancedDashboard from './pages/EnhancedDashboard';
-import ResumeBuilder from "./pages/ResumeBuilder";
+import SexyResumeForm from './pages/SexyResumeForm';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -34,7 +34,7 @@ function App() {
             } />
             <Route path="/resume/:id?" element={
               <ProtectedRoute>
-                <ResumeBuilder />
+                <SexyResumeForm />
               </ProtectedRoute>
             } />
           </Routes>
