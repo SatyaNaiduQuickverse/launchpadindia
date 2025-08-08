@@ -1,0 +1,21 @@
+{
+  "name": "resume-builder-app",
+  "version": "1.0.0",
+  "description": "MERN application for student resume building service",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && PORT=3037 npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["react", "node", "express", "postgresql", "resume", "students"],
+  "author": "Your Company",
+  "license": "MIT"
+}
