@@ -17,20 +17,29 @@ const createTables = async () => {
       )
     `);
 
-    // Resumes table
+    // Enhanced resumes table with all sections
     await pool.query(`
       CREATE TABLE IF NOT EXISTS resumes (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         title VARCHAR(255) NOT NULL DEFAULT 'My Resume',
-        personal_info JSONB NOT NULL DEFAULT '{}',
+        personal_info JSONB DEFAULT '{}',
         education JSONB DEFAULT '[]',
         experience JSONB DEFAULT '[]',
-        skills JSONB DEFAULT '[]',
         projects JSONB DEFAULT '[]',
+        skills JSONB DEFAULT '[]',
+        positions JSONB DEFAULT '[]',
+        awards JSONB DEFAULT '[]',
         certifications JSONB DEFAULT '[]',
+        volunteering JSONB DEFAULT '[]',
+        conferences JSONB DEFAULT '[]',
+        publications JSONB DEFAULT '[]',
+        patents JSONB DEFAULT '[]',
+        test_scores JSONB DEFAULT '[]',
+        scholarships JSONB DEFAULT '[]',
+        guardians JSONB DEFAULT '[]',
         languages JSONB DEFAULT '[]',
-        additional_sections JSONB DEFAULT '{}',
+        subjects JSONB DEFAULT '[]',
         template_id VARCHAR(50) DEFAULT 'modern',
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
