@@ -331,7 +331,8 @@ const ResumeBuilder = () => {
               </Button>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                  Professional Resume Builder
+                  {id && id !== 'new' ? `Edit Resume #${id}` : 'Create New Resume'}
+                  {resumeData.basic?.title && <span className="text-lg font-normal"> - {resumeData.basic.title}</span>}
                 </h1>
                 <p className="text-slate-600 flex items-center">
                   <Sparkles className="w-4 h-4 mr-1 text-yellow-500" />

@@ -205,7 +205,8 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4">
                           <p className="font-medium">{resume.title}</p>
-                          <p className="text-sm text-muted-foreground">ID: {resume.id}</p>
+                          <p className="font-medium">{resume.title}</p>
+                          <p className="text-sm text-muted-foreground">ID: #{resume.id}</p>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center space-x-2">

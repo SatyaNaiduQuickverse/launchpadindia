@@ -56,7 +56,7 @@ const AdminResumeDetail = () => {
     try {
       await axios.put(`/api/admin/resumes/${id}/review`, reviewForm);
       toast.success('Review submitted successfully');
-      setResumeData({...resume, ...reviewForm});
+      setResume(prev => ({...prev, ...reviewForm}));
     } catch (error) {
       toast.error('Failed to submit review');
     }
@@ -118,7 +118,7 @@ const AdminResumeDetail = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-slate-900">
-                {resume.first_name} {resume.last_name}'s Resume
+                Resume #{resume.id}
               </h1>
               <p className="text-slate-600">{resume.email}</p>
             </div>

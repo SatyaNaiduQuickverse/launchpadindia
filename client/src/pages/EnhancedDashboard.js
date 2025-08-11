@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { ResumeNameDialog } from '../components/ResumeNameDialog';
 import { 
   User, 
   FileText, 
@@ -22,6 +22,7 @@ const EnhancedDashboard = () => {
   const { user } = useAuth();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showNameDialog, setShowNameDialog] = useState(false);
 
   useEffect(() => {
     fetchResumes();
@@ -38,9 +39,9 @@ const EnhancedDashboard = () => {
     }
   };
 
-  const createNewResume = async () => {
+  const createNewResume = async (title) => {
     try {
-      await axios.post('/api/resumes', { title: 'New Resume' });
+      await axios.post('/api/resumes', { title });
       toast.success('Resume created successfully');
       fetchResumes();
     } catch (error) {
@@ -93,8 +94,8 @@ const EnhancedDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Resumes</p>
-                  <p className="text-3xl font-bold">{resumes.filter(r => r.is_active).length}</p>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-3xl font-bold">{resumes.filter(r => r.completion_percentage > 80).length}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
@@ -114,12 +115,31 @@ const EnhancedDashboard = () => {
           </Card>
         </div>
 
-        {/* Actions */}
-        <div className="mb-8">
-          <Button onClick={createNewResume} size="lg">
-            <Plus className="w-5 h-5 mr-2" />
-            Create New Resume
-          </Button>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowNameDialog(true)}>
+            <CardContent className="p-6 text-center">
+              <Plus className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+              <h3 className="font-medium">Create New Resume</h3>
+              <p className="text-sm text-slate-600">Start building your resume</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 text-center">
+              <FileText className="w-8 h-8 mx-auto mb-2 text-green-600" />
+              <h3 className="font-medium">Templates</h3>
+              <p className="text-sm text-slate-600">Browse resume templates</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 text-center">
+              <User className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+              <h3 className="font-medium">Profile</h3>
+              <p className="text-sm text-slate-600">Update your information</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Resumes List */}
@@ -133,7 +153,7 @@ const EnhancedDashboard = () => {
                 <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">No resumes yet</h3>
                 <p className="text-muted-foreground mb-6">Get started by creating your first resume</p>
-                <Button onClick={createNewResume}>
+                <Button onClick={() => setShowNameDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Resume
                 </Button>
@@ -148,9 +168,10 @@ const EnhancedDashboard = () => {
                       </div>
                       <div>
                         <h3 className="font-medium">{resume.title}</h3>
+                        <p className="text-xs text-slate-500">ID: #{resume.id}</p>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                          <span>Updated: {new Date(resume.updated_at).toLocaleDateString()}</span>
-                          {resume.is_active && <Badge variant="secondary">Active</Badge>}
+                          <span>Updated: {new Date(resume.updated_at).toLocaleString()}</span>
+                          <Badge variant="secondary">{resume.completion_percentage}% Complete</Badge>
                         </div>
                       </div>
                     </div>
@@ -171,6 +192,12 @@ const EnhancedDashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        <ResumeNameDialog 
+          isOpen={showNameDialog}
+          onClose={() => setShowNameDialog(false)}
+          onConfirm={createNewResume}
+        />
       </div>
     </div>
   );
