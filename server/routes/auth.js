@@ -22,25 +22,20 @@ router.post('/register', [
 
     const { email, password, firstName, lastName, phone } = req.body;
 
-    // Check if user exists
     const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (userExists.rows.length > 0) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user
     const result = await pool.query(
-      'INSERT INTO users (email, password_hash, first_name, last_name, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name',
+      'INSERT INTO users (email, password_hash, first_name, last_name, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name, is_admin',
       [email, passwordHash, firstName, lastName, phone]
     );
 
     const user = result.rows[0];
-
-    // Create JWT token
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
 
     res.status(201).json({
@@ -49,7 +44,8 @@ router.post('/register', [
         id: user.id,
         email: user.email,
         firstName: user.first_name,
-        lastName: user.last_name
+        lastName: user.last_name,
+        isAdmin: user.is_admin || false
       }
     });
   } catch (error) {
@@ -71,7 +67,6 @@ router.post('/login', [
 
     const { email, password } = req.body;
 
-    // Get user
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -79,13 +74,11 @@ router.post('/login', [
 
     const user = result.rows[0];
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Create JWT token
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
 
     res.json({
@@ -94,7 +87,8 @@ router.post('/login', [
         id: user.id,
         email: user.email,
         firstName: user.first_name,
-        lastName: user.last_name
+        lastName: user.last_name,
+        isAdmin: user.is_admin || false
       }
     });
   } catch (error) {
@@ -106,8 +100,16 @@ router.post('/login', [
 // Get current user
 router.get('/me', auth, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, email, first_name, last_name, phone FROM users WHERE id = $1', [req.user.userId]);
-    res.json(result.rows[0]);
+    const result = await pool.query('SELECT id, email, first_name, last_name, phone, is_admin FROM users WHERE id = $1', [req.user.userId]);
+    const user = result.rows[0];
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      phone: user.phone,
+      isAdmin: user.is_admin || false
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

@@ -3,13 +3,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { RichTextEditor } from '../ui/rich-editor';
-import { ValidationAlert, CompletionAlert } from '../ui/ValidationAlert';
-import { validateSection } from '../../utils/validation';
 import { User, Camera, Mail, Phone, Calendar, Globe } from 'lucide-react';
 
 export const BasicDetailsSection = ({ register, errors, data = {}, onChange }) => {
-  const validation = validateSection('basic', data);
-
   return (
     <Card className="backdrop-blur-xl bg-white/40 border-white/20 shadow-2xl">
       <CardHeader className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
@@ -24,11 +20,6 @@ export const BasicDetailsSection = ({ register, errors, data = {}, onChange }) =
         </div>
       </CardHeader>
       <CardContent className="p-8">
-        
-        {validation.isValid ? 
-          <CompletionAlert /> : 
-          <ValidationAlert missingFields={validation.missing} sectionName="Basic Details" />
-        }
 
         {/* Profile Photo */}
         <div className="mb-8 text-center">
@@ -44,43 +35,43 @@ export const BasicDetailsSection = ({ register, errors, data = {}, onChange }) =
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">First Name *</label>
+            <label className="text-sm font-medium text-slate-700">First Name</label>
             <div className="relative">
               <Input 
-                {...register('firstName', {required: true})} 
+                {...register('firstName')} 
                 placeholder="John"
                 value={data.firstName || ''}
                 onChange={(e) => onChange('firstName', e.target.value)}
-                className={`pl-10 bg-white/60 border-white/30 focus:bg-white/80 ${!data.firstName ? 'border-red-300' : ''}`}
+                className="pl-10 bg-white/60 border-white/30 focus:bg-white/80"
               />
               <User className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Last Name *</label>
+            <label className="text-sm font-medium text-slate-700">Last Name</label>
             <div className="relative">
               <Input 
-                {...register('lastName', {required: true})} 
+                {...register('lastName')} 
                 placeholder="Doe"
                 value={data.lastName || ''}
                 onChange={(e) => onChange('lastName', e.target.value)}
-                className={`pl-10 bg-white/60 border-white/30 focus:bg-white/80 ${!data.lastName ? 'border-red-300' : ''}`}
+                className="pl-10 bg-white/60 border-white/30 focus:bg-white/80"
               />
               <User className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Email *</label>
+            <label className="text-sm font-medium text-slate-700">Email</label>
             <div className="relative">
               <Input 
-                {...register('email', {required: true})} 
+                {...register('email')} 
                 type="email"
                 placeholder="john@example.com"
                 value={data.email || ''}
                 onChange={(e) => onChange('email', e.target.value)}
-                className={`pl-10 bg-white/60 border-white/30 focus:bg-white/80 ${!data.email ? 'border-red-300' : ''}`}
+                className="pl-10 bg-white/60 border-white/30 focus:bg-white/80"
               />
               <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
             </div>

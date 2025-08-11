@@ -8,6 +8,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import EnhancedDashboard from './pages/EnhancedDashboard';
 import ResumeBuilder from "./pages/ResumeBuilder";
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminResumeDetail from './pages/AdminResumeDetail';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -16,28 +19,52 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div>Loading...</div>;
+  return user && user.isAdmin ? children : <Navigate to="/admin/login" />;
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="App">
-          <Navbar />
-          <Toaster position="top-right" />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path="/admin/resume/:id" element={
+              <AdminRoute>
+                <AdminResumeDetail />
+              </AdminRoute>
+            } />
+            
+            {/* Student Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
+                <Navbar />
                 <EnhancedDashboard />
               </ProtectedRoute>
             } />
             <Route path="/resume/:id?" element={
               <ProtectedRoute>
+                <Navbar />
                 <ResumeBuilder />
               </ProtectedRoute>
             } />
           </Routes>
+          
+          <Toaster position="top-right" />
         </div>
       </Router>
     </AuthProvider>
