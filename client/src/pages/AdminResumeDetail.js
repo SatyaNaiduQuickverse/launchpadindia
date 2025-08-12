@@ -143,7 +143,7 @@ const AdminResumeDetail = () => {
           {/* Resume Content */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Basic Info */}
+            {/* Basic Info with Photo */}
             {resume.personal_info && (
               <Card>
                 <CardHeader>
@@ -153,29 +153,57 @@ const AdminResumeDetail = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Name</label>
-                      <p>{resume.personal_info.firstName} {resume.personal_info.lastName}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Email</label>
-                      <p>{resume.personal_info.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Phone</label>
-                      <p>{resume.personal_info.phone || 'Not provided'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">LinkedIn</label>
-                      <p>{resume.personal_info.linkedin || 'Not provided'}</p>
-                    </div>
-                    {resume.personal_info.summary && (
-                      <div className="col-span-2">
-                        <label className="text-sm font-medium text-gray-600">Summary</label>
-                        <div dangerouslySetInnerHTML={{ __html: resume.personal_info.summary }} />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Profile Photo Column */}
+                    <div className="flex flex-col items-center">
+                      <div className="w-32 h-32 rounded-full overflow-hidden shadow-lg border-4 border-white/50 mb-4">
+                        {resume.profile_photo ? (
+                          <img 
+                            src={resume.profile_photo} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <User className="w-16 h-16 text-white" />
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <p className="text-sm text-gray-500">Profile Photo</p>
+                    </div>
+
+                    {/* Personal Details */}
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Name</label>
+                        <p className="font-semibold">{resume.personal_info.firstName} {resume.personal_info.lastName}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Email</label>
+                        <p>{resume.personal_info.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Phone</label>
+                        <p>{resume.personal_info.phone || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Date of Birth</label>
+                        <p>{resume.personal_info.dateOfBirth || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">LinkedIn</label>
+                        <p>{resume.personal_info.linkedin || 'Not provided'}</p>
+                      </div>
+                      {resume.personal_info.summary && (
+                        <div className="sm:col-span-2">
+                          <label className="text-sm font-medium text-gray-600">Summary</label>
+                          <div 
+                            className="mt-2 prose prose-sm" 
+                            dangerouslySetInnerHTML={{ __html: resume.personal_info.summary }} 
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

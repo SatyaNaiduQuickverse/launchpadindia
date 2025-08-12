@@ -49,16 +49,14 @@ function App() {
               </AdminRoute>
             } />
             
-            {/* Student Routes */}
+            {/* Student Routes - NAVBAR REMOVED */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Navbar />
                 <EnhancedDashboard />
               </ProtectedRoute>
             } />
             <Route path="/resume/:id?" element={
               <ProtectedRoute>
-                <Navbar />
                 <ResumeBuilder />
               </ProtectedRoute>
             } />
