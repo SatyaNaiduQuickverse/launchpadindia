@@ -26,6 +26,7 @@ import { TestScoresSection } from '../components/sections/TestScoresSection';
 import { ScholarshipsSection } from '../components/sections/ScholarshipsSection';
 import { GuardianSection } from '../components/sections/GuardianSection';
 import { MiscellaneousSection } from '../components/sections/MiscellaneousSection';
+import { CheckoutModal } from '../components/CheckoutModal';
 
 // Icons
 import { Save, ArrowLeft, Send, Sparkles } from 'lucide-react';
@@ -39,6 +40,7 @@ const ResumeBuilder = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('basic');
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [resumeData, setResumeData] = useState({
     basic: {},
     education: [],
@@ -353,11 +355,11 @@ const ResumeBuilder = () => {
               </Button>
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-green-500 to-emerald-600"
-                onClick={() => toast.success('Feature coming soon!')}
+                onClick={() => setShowCheckoutModal(true)}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
               >
                 <Send className="w-5 h-5 mr-2" />
-                Submit for Review
+                Submit for Review - ₹249
               </Button>
             </div>
           </div>
@@ -380,6 +382,14 @@ const ResumeBuilder = () => {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal 
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        resumeId={id}
+        resumeTitle={resumeData.basic?.firstName ? `${resumeData.basic.firstName}'s Resume` : 'My Resume'}
+      />
     </div>
   );
 };

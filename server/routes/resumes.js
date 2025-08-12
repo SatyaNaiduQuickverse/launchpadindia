@@ -35,26 +35,21 @@ router.get('/', auth, async (req, res) => {
  }
 });
 
-// Get specific resume with all sections
+// Get specific resume
 router.get('/:id', auth, async (req, res) => {
  try {
-   debugLog(req, `Fetching resume ${req.params.id} for user ${req.user.userId}`);
-   
    const result = await pool.query(`
      SELECT * FROM resumes 
      WHERE id = $1 AND user_id = $2
    `, [req.params.id, req.user.userId]);
    
    if (result.rows.length === 0) {
-     debugLog(req, '❌ Resume not found');
      return res.status(404).json({ message: 'Resume not found' });
    }
    
-   debugLog(req, '✅ Resume found successfully');
    res.json(result.rows[0]);
  } catch (error) {
-   debugLog(req, '❌ Error fetching resume', { error: error.message, stack: error.stack });
-   res.status(500).json({ message: 'Server error', debug: error.message });
+   res.status(500).json({ message: 'Server error' });
  }
 });
 
@@ -63,11 +58,8 @@ router.post('/', auth, [
  body('title').optional().trim().isLength({ min: 1, max: 255 })
 ], async (req, res) => {
  try {
-   debugLog(req, `Creating new resume for user ${req.user.userId}`, { body: req.body });
-   
    const errors = validationResult(req);
    if (!errors.isEmpty()) {
-     debugLog(req, '❌ Validation errors', { errors: errors.array() });
      return res.status(400).json({ errors: errors.array() });
    }
 
@@ -79,83 +71,36 @@ router.post('/', auth, [
      RETURNING *
    `, [req.user.userId, title]);
 
-   debugLog(req, '✅ Resume created successfully', { resumeId: result.rows[0].id });
    res.status(201).json(result.rows[0]);
  } catch (error) {
-   debugLog(req, '❌ Error creating resume', { error: error.message, stack: error.stack });
-   res.status(500).json({ message: 'Server error', debug: error.message });
+   res.status(500).json({ message: 'Server error' });
  }
 });
 
-// Update resume with all sections - MAIN SAVE FUNCTION
+// Update resume
 router.put('/:id', auth, async (req, res) => {
  try {
    const resumeId = req.params.id;
    const userId = req.user.userId;
    
-   debugLog(req, `🚀 STARTING RESUME SAVE - Resume ID: ${resumeId}, User ID: ${userId}`);
-   debugLog(req, 'Request body keys:', Object.keys(req.body));
-   
-   // Check if resume exists first
    const existsCheck = await pool.query(`
      SELECT id, title FROM resumes 
      WHERE id = $1 AND user_id = $2
    `, [resumeId, userId]);
    
    if (existsCheck.rows.length === 0) {
-     debugLog(req, '❌ Resume not found or access denied');
      return res.status(404).json({ message: 'Resume not found' });
    }
-   
-   debugLog(req, '✅ Resume exists, proceeding with update');
 
    const { 
-     title,
-     personalInfo,
-     education,
-     experience,
-     projects,
-     skills,
-     positions,
-     awards,
-     certifications,
-     volunteering,
-     conferences,
-     publications,
-     patents,
-     testScores,
-     scholarships,
-     guardians,
-     languages,
-     subjects,
-     templateId 
+     title, personalInfo, education, experience, projects, skills,
+     positions, awards, certifications, volunteering, conferences,
+     publications, patents, testScores, scholarships, guardians,
+     languages, subjects, templateId 
    } = req.body;
 
-   // Extract profile photo from personalInfo
    const profilePhoto = personalInfo?.profilePhoto || null;
 
-   debugLog(req, 'Extracted data sections:', {
-     hasPersonalInfo: !!personalInfo,
-     hasProfilePhoto: !!profilePhoto,
-     hasEducation: !!education,
-     hasExperience: !!experience,
-     hasProjects: !!projects,
-     hasSkills: !!skills,
-     hasPositions: !!positions,
-     hasAwards: !!awards,
-     hasCertifications: !!certifications,
-     hasVolunteering: !!volunteering,
-     hasConferences: !!conferences,
-     hasPublications: !!publications,
-     hasPatents: !!patents,
-     hasTestScores: !!testScores,
-     hasScholarships: !!scholarships,
-     hasGuardians: !!guardians,
-     hasLanguages: !!languages,
-     hasSubjects: !!subjects
-   });
-
-   // Calculate completion percentage
    const sections = [
      personalInfo, education, experience, projects, skills,
      positions, awards, certifications, volunteering, conferences,
@@ -170,35 +115,7 @@ router.put('/:id', auth, async (req, res) => {
    }).length;
    
    const completionPercentage = Math.round((completedSections / sections.length) * 100);
-   
-   debugLog(req, `Completion calculation: ${completedSections}/${sections.length} = ${completionPercentage}%`);
 
-   // Prepare JSON data
-   const jsonData = {
-     personalInfo: personalInfo ? JSON.stringify(personalInfo) : null,
-     education: education ? JSON.stringify(education) : null,
-     experience: experience ? JSON.stringify(experience) : null,
-     projects: projects ? JSON.stringify(projects) : null,
-     skills: skills ? JSON.stringify(skills) : null,
-     positions: positions ? JSON.stringify(positions) : null,
-     awards: awards ? JSON.stringify(awards) : null,
-     certifications: certifications ? JSON.stringify(certifications) : null,
-     volunteering: volunteering ? JSON.stringify(volunteering) : null,
-     conferences: conferences ? JSON.stringify(conferences) : null,
-     publications: publications ? JSON.stringify(publications) : null,
-     patents: patents ? JSON.stringify(patents) : null,
-     testScores: testScores ? JSON.stringify(testScores) : null,
-     scholarships: scholarships ? JSON.stringify(scholarships) : null,
-     guardians: guardians ? JSON.stringify(guardians) : null,
-     languages: languages ? JSON.stringify(languages) : null,
-     subjects: subjects ? JSON.stringify(subjects) : null
-   };
-
-   debugLog(req, 'JSON serialization completed successfully');
-
-   // Execute the update query
-   debugLog(req, '🔄 Executing database update...');
-   
    const result = await pool.query(`
      UPDATE resumes 
      SET 
@@ -228,40 +145,27 @@ router.put('/:id', auth, async (req, res) => {
      RETURNING id, title, completion_percentage, updated_at
    `, [
      resumeId, userId, title,
-     jsonData.personalInfo,
+     personalInfo ? JSON.stringify(personalInfo) : null,
      profilePhoto,
-     jsonData.education,
-     jsonData.experience,
-     jsonData.projects,
-     jsonData.skills,
-     jsonData.positions,
-     jsonData.awards,
-     jsonData.certifications,
-     jsonData.volunteering,
-     jsonData.conferences,
-     jsonData.publications,
-     jsonData.patents,
-     jsonData.testScores,
-     jsonData.scholarships,
-     jsonData.guardians,
-     jsonData.languages,
-     jsonData.subjects,
+     education ? JSON.stringify(education) : null,
+     experience ? JSON.stringify(experience) : null,
+     projects ? JSON.stringify(projects) : null,
+     skills ? JSON.stringify(skills) : null,
+     positions ? JSON.stringify(positions) : null,
+     awards ? JSON.stringify(awards) : null,
+     certifications ? JSON.stringify(certifications) : null,
+     volunteering ? JSON.stringify(volunteering) : null,
+     conferences ? JSON.stringify(conferences) : null,
+     publications ? JSON.stringify(publications) : null,
+     patents ? JSON.stringify(patents) : null,
+     testScores ? JSON.stringify(testScores) : null,
+     scholarships ? JSON.stringify(scholarships) : null,
+     guardians ? JSON.stringify(guardians) : null,
+     languages ? JSON.stringify(languages) : null,
+     subjects ? JSON.stringify(subjects) : null,
      templateId,
      completionPercentage
    ]);
-
-   if (result.rows.length === 0) {
-     debugLog(req, '❌ Update query returned no rows');
-     return res.status(404).json({ message: 'Resume not found after update' });
-   }
-
-   debugLog(req, '🎉 RESUME SAVE SUCCESSFUL!', {
-     resumeId: result.rows[0].id,
-     title: result.rows[0].title,
-     completionPercentage: result.rows[0].completion_percentage,
-     hasPhoto: !!profilePhoto,
-     updatedAt: result.rows[0].updated_at
-   });
 
    res.json({
      success: true,
@@ -270,30 +174,14 @@ router.put('/:id', auth, async (req, res) => {
    });
 
  } catch (error) {
-   debugLog(req, '💥 CRITICAL ERROR IN RESUME SAVE', {
-     error: error.message,
-     stack: error.stack,
-     code: error.code,
-     detail: error.detail,
-     hint: error.hint
-   });
-   
-   res.status(500).json({ 
-     message: 'Failed to save resume',
-     debug: {
-       error: error.message,
-       code: error.code,
-       detail: error.detail
-     }
-   });
+   console.error('Error updating resume:', error);
+   res.status(500).json({ message: 'Failed to save resume' });
  }
 });
 
 // Delete resume
 router.delete('/:id', auth, async (req, res) => {
  try {
-   debugLog(req, `Deleting resume ${req.params.id} for user ${req.user.userId}`);
-   
    const result = await pool.query(`
      DELETE FROM resumes 
      WHERE id = $1 AND user_id = $2 
@@ -301,66 +189,57 @@ router.delete('/:id', auth, async (req, res) => {
    `, [req.params.id, req.user.userId]);
    
    if (result.rows.length === 0) {
-     debugLog(req, '❌ Resume not found for deletion');
      return res.status(404).json({ message: 'Resume not found' });
    }
    
-   debugLog(req, '✅ Resume deleted successfully');
    res.json({ message: 'Resume deleted successfully' });
  } catch (error) {
-   debugLog(req, '❌ Error deleting resume', { error: error.message });
-   res.status(500).json({ message: 'Server error', debug: error.message });
+   res.status(500).json({ message: 'Server error' });
  }
 });
 
-// Submit resume for review
+// Submit resume for review with payment
 router.post('/:id/submit', auth, async (req, res) => {
- try {
-   debugLog(req, `Submitting resume ${req.params.id} for review`);
-   
-   const resumeCheck = await pool.query(`
-     SELECT id, title FROM resumes 
-     WHERE id = $1 AND user_id = $2
-   `, [req.params.id, req.user.userId]);
-   
-   if (resumeCheck.rows.length === 0) {
-     debugLog(req, '❌ Resume not found for submission');
-     return res.status(404).json({ message: 'Resume not found' });
-   }
+  try {
+    const { paymentDetails, contactInfo, specialRequests } = req.body;
+    
+    const resumeCheck = await pool.query(`
+      SELECT id, title FROM resumes 
+      WHERE id = $1 AND user_id = $2
+    `, [req.params.id, req.user.userId]);
+    
+    if (resumeCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Resume not found' });
+    }
 
-   const result = await pool.query(`
-     INSERT INTO resume_submissions (resume_id, status) 
-     VALUES ($1, 'pending') 
-     RETURNING *
-   `, [req.params.id]);
+    const result = await pool.query(`
+      INSERT INTO resume_submissions (
+        resume_id, status, payment_status, payment_amount,
+        payment_method, transaction_id, contact_email,
+        contact_phone, special_requests
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `, [
+      req.params.id,
+      'pending',
+      'paid',
+      paymentDetails.amount,
+      paymentDetails.method,
+      paymentDetails.transactionId,
+      contactInfo.email,
+      contactInfo.phone,
+      specialRequests
+    ]);
 
-   debugLog(req, '✅ Resume submitted successfully');
-   res.status(201).json({
-     message: 'Resume submitted for review successfully',
-     submission: result.rows[0]
-   });
- } catch (error) {
-   debugLog(req, '❌ Error submitting resume', { error: error.message });
-   res.status(500).json({ message: 'Server error', debug: error.message });
- }
-});
-
-// Health check endpoint
-router.get('/health', async (req, res) => {
- try {
-   const dbResult = await pool.query('SELECT NOW()');
-   res.json({
-     status: 'healthy',
-     database: 'connected',
-     timestamp: dbResult.rows[0].now
-   });
- } catch (error) {
-   res.status(500).json({
-     status: 'unhealthy',
-     database: 'disconnected',
-     error: error.message
-   });
- }
+    res.status(201).json({
+      message: 'Resume submitted for review successfully',
+      submission: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error submitting resume:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;

@@ -11,6 +11,7 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminResumeDetail from './pages/AdminResumeDetail';
+import AdminPaidSubmissions from './pages/AdminPaidSubmissions';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -31,12 +32,10 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={
               <AdminRoute>
@@ -48,8 +47,12 @@ function App() {
                 <AdminResumeDetail />
               </AdminRoute>
             } />
+            <Route path="/admin/paid-submissions" element={
+              <AdminRoute>
+                <AdminPaidSubmissions />
+              </AdminRoute>
+            } />
             
-            {/* Student Routes - NAVBAR REMOVED */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <EnhancedDashboard />
